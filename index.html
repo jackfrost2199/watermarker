@@ -1,0 +1,261 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+  <title>Watermarking</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Foundation | Welcome</title>
+    <link rel="stylesheet" href="css/foundation.css" />
+    <link rel="stylesheet" type="text/css" href="css/index.css">
+    <script src="js/vendor/modernizr.js"></script>
+    <script src="js/script.js"></script>
+    
+  </head>
+  <body>
+  <!--  Navigation Bar -->
+ 	<nav class="top-bar foundation-bar" data-topbar>
+  		<ul class="title-area">
+    		<li class="name">
+     			<span data-tooltip class="has-tip" title="Generate PCR Tag Watermarks for your gene."><h1 class="show-for-small-only"><a href="#">Watermarker</a></h1></span>
+     			<span data-tooltip class="has-tip" title="Generate PCR Tag Watermarks for your gene."><h1 class="show-for-medium-only"><a href="#">Watermarker</a></h1></span>
+     			<span data-tooltip class="has-tip" title="Generate PCR Tag Watermarks for your gene."><h1 class="show-for-large-only"><a href="#">Watermarker</a></h1></span>
+    		</li>
+  		</ul>
+  		<!-- Right Nav Section -->
+  		<section class="top-bar-section">
+    		<ul class="right">
+      			<li><a  href="http://foundation.zurb.com/docs/"  target="_blank">Foundation Docs</a></li>
+      			<li><a  href="http://codepen.io/ZURBFoundation/full/olduj/" target="_blank">Grid Example</a></li>
+      			<li><a  href="http://codepen.io/ZURBFoundation/full/vKwHa/" target="_blank">Navigation Example</a></li>
+      			<li class="active"><a  href="http://codepen.io/ZURBFoundation/full/AuvoL" target="_blank">Forms</a></li>
+      			<li><a  href="http://codepen.io/ZURBFoundation/full/fcFnq" target="_blank">Interchange</a></li>
+    		</ul>
+  </section>
+</nav>
+
+  <!-- Set up the tutorial lightbox -->
+  <div id="light" class="white_content">Tutorial<a href = "javascript:void(0)" onclick = "document.getElementById('light').style.display='none';document.getElementById('fade').style.display='none'">Next</a></div>
+  <div id="fade" class="black_overlay"></div>
+
+<!-- Top of Page Header -->
+
+<br /><br />
+ <div class="row">
+  <div class="large-12 columns" >
+ 	<h1>Watermarker</h1>
+ 	<h4>To generate a set of watermarks that can be used as PCR Tags (similar to what was done for the synthetic yeast project) fill out the form below with your gene sequence.  Your sequence must begin on an open reading frame to get accurate results.</h4>
+  </div>
+</div>
+ 
+
+<!-- Alert -->
+<div class="row">
+  <div class="small-12 columns">
+    <br>
+    <div data-alert class="alert-box alert" style="display:none;" id="error_alert">
+      One or more of the parameters you entered were incorrect.  The incorrect parameters are highlighted in red below.
+    <a href="#" class="close">&times;</a>
+    </div>
+  </div>
+</div>
+
+
+<div class="row">
+  <div class="small-12 small-centered columns">
+      <form action="javascript:calculateWatermarks()" id="watermark">
+        
+        <!-- First Row -->
+        <div class="row">
+          
+          <!-- Genomic Sequence -->
+          <div class="large-12 columns">
+            <label id="genomic_sequence_label">
+            	<span data-tooltip aria-haspopup="true" class="has-tip" data-options="show_on:large;disable_for_touch:true" title="Enter the genomic sequence here.  This sequence should consist of only A,C,G, and Ts.  No ID line should be included (FASTA format).">Genomic sequence</span>
+              	<textarea class="error" name="genomic_sequence" id="genomic_sequence" autofocus required maxlenth="50000" rows="9" form="watermark" placeholder="ATGCGGAAGCTAGC..." aria-describedby="genomic_sequence_help" ></textarea>
+            </label>
+            <small class="error" id="genomic_sequence_error" style="display:none;">Invalid entry</small>
+            <p id="genomic_sequence_help" class="left help">Paste here your genomic sequence that you want watermarks generated for.  Only A, T, G, and C are acceptable but can be either capital or lowercase.  Spaces will be removed.  Ns are not allowed currently.</p>           		
+            
+          </div>
+        </div>
+        
+        <!-- Second Row -->
+        <div class="row">
+          <!-- Organism select box -->
+          <div class="large-12 columns">
+            <label id="organism_label">Organism (for specific codon table)
+              <select class="error" id="organism">
+                <option value="standard">Standard Codon Table</option>
+				<option value="mycobacterium">Mycobacterium smegmatis</option>
+				<option value="yeast">Saccharomyces cerevisiae</option>
+				<option value="human">Homo Sapiens</option>
+			  </select>
+            </label>
+            <p id="organism_help" class="left help">While originally thought to be universal, the codon translation table can vary in some species.  Select the species that your watermarks are being generated in.  If your species uses the general codon translation table, select 'Standard Codon Table' if it is not otherwise listed.</p>           		
+          </div>
+        </div>
+        
+        <!-- Third Row -->
+        <div class="row">
+          
+          <!-- Minimum Melting Temperature -->
+          <div class="large-4 columns">
+            <div class="row collapse">
+              <label id="minimum_melting_temp_label">Minimum melting temperature
+	            <div class="small-9 columns">
+                	<input type="text" class="error" id="minimum_melting_temp" value="58" aria-describedby="minimum_melting_temp_help" />
+              	</div>
+              	<div class="small-3 columns">
+                	<span class="postfix">&degC</span>
+              	</div>
+              	</div>
+              	</label>
+              	<small id="minimum_melting_temp_error" class="error" style="display:none;">Invalid entry.</small>
+              <p id="minimum_melting_temp_help" class="left help">This is the minimum melting temperature that your watermarks will be required to be estimated at.</p>
+          </div>
+          
+          <!-- Minimum Melting Temperature -->          
+          <div class="large-4 columns">
+            <div class="row collapse">
+              <label id="maximum_melting_temp_label">Maximum melting temperature
+              	<div class="small-9 columns">
+                	<input type="text" class="error" id="maximum_melting_temp" value="60" aria-describedby="maximum_melting_temp_help" />
+              	</div>
+              	<div class="small-3 columns">
+                	<span class="postfix">&degC</span>
+              	</div>
+              	</div>
+              </label>
+              <small class="error" id="maximum_melting_temp_error" style="display:none;">Invalid entry</small>
+              <p id="maximum_melting_temp_help" class="left help">This is the maximum melting temperature that your watermarks will be required to be estimated at.</p>
+          </div>
+          
+          <!-- Minimum percentage of recoded nucleotides -->          
+          <div class="large-4 columns">
+           	<div class="row collapse">
+              	<label id="minimum_recoded_label">Minimum percentage of recoded nucleotides
+              	<div class="small-9 columns">
+                	<input type="text" class="error" id="minimum_recoded" value="33" aria-describedby="minimum_recoded_help"/>
+              	</div>
+              	<div class="small-3 columns">
+                	<span class="postfix">%</span>
+            	</div>
+           	</div>
+           	</label>
+           	<small class="error" id="minimum_recoded_error" style="display:none;">Invalid entry</small>
+           	<p id="minimum_recoded_help" class="left help">This value should be the minimum percentage of nucleotides within your watermark sequence that you want changed to different nucleotides than what is found in the reference genome.  Ultimately having a different enough variation is your validation that your process worked (i.e. you 'see' your watermarks).</p>           		
+          </div>
+          <!-- End Row -->
+        </div>
+        
+        <!-- Fourth Row -->          
+        <div class="row">
+          
+          <!-- Smallest amplification region allowed --> 
+          <div class="large-6 columns">
+            <div class="row collapse">
+              <label id="minimum_amplificiation_label">Smallest amplification region allowed
+                <div class="small-9 columns">
+                	<input type="text" class="error" id="minimum_amplification" value="200" aria-describedby="minimum_amplification_help"/>
+                </div>
+                <div class="small-3 columns">
+                	<span class="postfix">nucleotides</span>
+                </div>
+              </label>
+            </div>
+           	<small class="error" id="minimum_amplification_error" style="display:none;">Invalid entry</small>
+            <p id="minimum_amplification_help" class="left help">This is the smallest number of nucleotides (including watermarks) that should make up your amplification region.  This is the region that will be amplified by PCR in order to validate that your synthetic gene is present.</p>           		
+            
+          </div>
+          
+          <!-- Largest amplification region allowed --> 
+          <div class="large-6 columns">
+            <div class="row collapse">
+              <label id="maximum_amplification_label">Largest amplification region allowed
+                <div class="small-9 columns">
+                	<input type="text" class="error" id="maximum_amplification" value="500" aria-describedby="maximum_amplification_help"/>
+                </div>
+                <div class="small-3 columns">
+                  	<span class="postfix">nucleotides</span>
+                </div>
+                </label>
+            </div>
+            <small class="error" id="maximum_amplification_error" style="display:none;">Invalid entry</small>
+            <p id="maximum_amplification_help" class="left help">This is the largets number of nucleotides (including watermarks) that should make up your amplification region.  This is the region that will be amplified by PCR in order to validate that your synthetic gene is present.</p>           		
+          </div>
+        </div>
+        
+		<!--  Button here  -->
+        <a href="javascript:calculateWatermarks()" class="button expand">Generate Watermarks</a>
+
+	<div class="error_information" id="no_results"></div>
+
+<!------------------------------------------------------------------------- 
+-- Results Section
+--------------------------------------------------------------------------->
+
+  <div class="large-12 columns results" id="results_section">
+  <div class="post-box" itemscope>
+ 	<h1 class="light" itemprop="headline">Results</h1>
+ 	<h4>Here are the results.</h4>
+		<div class="row">
+          <!-- Smallest amplification region allowed --> 
+          <div class="large-6 columns">
+            <div class="row collapse">
+              <label>Left Watermark
+                <div class="small-12 columns" id="left_watermark">
+					<p class="nucleotides">No sequence analyzed.</p>
+					<p class="left help">Additional information for left watermark will be shown here</p>           		
+
+                </div>
+              </label>
+            </div>            
+          </div>
+          
+          <!-- Largest amplification region allowed --> 
+          <div class="large-6 columns">
+            <div class="row collapse">
+              <label>Right Watermark
+                <div class="small-12 columns" id="right_watermark">
+					<p class="nucleotides">No sequence analyzed.</p>
+					<p class="left help">Additional information for right watermark will be shown here.</p>           		
+                </div>
+                </label>
+            </div>
+          </div>
+        </div>
+        
+        
+                  <!-- Second Row -->
+        <div class="row">
+          <!-- Organism select box -->
+          <div class="large-12 columns">
+            <label id="organism_label">Full Nucleotide Sequence with Watermarks
+              <div id="full_watermark">
+              	<p class=nucleotides">No sequence analyzed.</p>
+              </div>
+              
+            </label>
+          
+          </div>
+        </div>
+        
+ 	</div>
+ 	<br />
+  </div>
+  </div>
+  
+
+  
+        
+      </form>
+  </div>
+</div>
+ 
+     <script src="js/vendor/jquery.js"></script>
+    <script src="js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+    </script>
+  </body>
+</html>
