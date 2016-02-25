@@ -45,8 +45,48 @@ h4 {
 }
 
 /**************************
+ * 
+ * Menu Bar
+ * 
+ * ************************/
+
+.header_bar {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    border-radius: 0;
+    border-style: solid;
+    border-width: 0;
+    font-family: "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
+    font-weight: normal;
+    line-height: normal;
+    margin: 0 0 1.25rem;
+    position: relative;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    padding: 1rem 2rem 1.0625rem 2rem;
+    font-size: 1rem;
+    background-color: #008CBA;
+    border-color: #007095;
+    color: #FFFFFF;
+    transition: background-color 300ms ease-out;
+	width:90%;
+	height:25px;
+}
+
+/**************************
 Lightbox / Tutorial CSS
 ***************************/
+
+.tutorial_text {
+    text-align: justify;
+    text-justify: inter-word;
+	height:80%;
+}
+
+.tutorial_title {
+	font-weight: bold;
+}
 
 .tutorial {
     visibility: hidden;

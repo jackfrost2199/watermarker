@@ -107,8 +107,8 @@ var CODON_TABLE = {
 		var kmer_scores = new Array();
 		var kmer_map = new Array();
 		var kmer_counter = 0;
-		var _firstKMER = true;
-		var _shiftCounter = 0;
+		var meltingTempCount = 0;
+		var percentChangedCount = 0;
 		
 		for (var i = 0; i < full_map.length; i++) {
 			kmer_map.push(full_map[i]);
@@ -116,7 +116,6 @@ var CODON_TABLE = {
 				kmer_map.shift();
 			}
 			if (kmer_map.length == (KMER_SIZE / 3)) {
-				_firstKMER = true;
 				// Have a kmer of length KMER_SIZE
 				// Need to determine a score
 				// Also need new nucleotides that match the score
@@ -171,13 +170,17 @@ var CODON_TABLE = {
 				
 				// determine melting temperature for the kmer, and filter
 				var melting_temp = determineMeltingTemperature(new_kmer_string);
-				if (melting_temp < minimum_melting_temp || melting_temp > maximum_melting_temp) continue;
-				
+				if (melting_temp < minimum_melting_temp || melting_temp > maximum_melting_temp) {
+				  meltingTempCount++;
+				  continue;
+				}
 				
 				// determine percentage of sequence changed and filter
 				var percent_changed = determinePercentageChanged (new_kmer_string, old_kmer_string);
-				if (percent_changed < minimum_recoded) continue;
-				
+				if (percent_changed < minimum_recoded) {
+				  percentChangedCount++;
+				  continue;
+				}
 				
 				var kscore = {
 							start_codon:i - (KMER_SIZE / 3),
@@ -328,8 +331,14 @@ var CODON_TABLE = {
 		
 		if (highest_scores.length == 0) {
 			// No results
-		  alert("No watermarks found with current parameters.");
+		    
 			var no_results_html="<p>No watermarks found within the current parameters.</p>";
+			if (meltingTempCount < percentChangedCount) {
+				no_results_html = no_results_html + "<p>Mimimum percentage of nucleotides may be set too high for results.</p>";
+			} else {
+				no_results_html = no_results_html + "<p>Melting temperature range may be set too narrow for results..</p>";
+			}
+			
 			document.getElementById('no_results').innerHTML = no_results_html; 
 			document.getElementById('no_results').style.visibility='visible';
 		} else {
@@ -657,13 +666,13 @@ function generateTutorial (tutorial_needed, tutorial_index) {
   var tutorialHTML;
   switch(tutorial_index) {
 	case 1:
-	  tutorialHTML="<p><div style=\"display:table;\"><div>Minimum and maximum melting temperature</div><div style=\"height: 80%;\">DNA is a double stranded molecule that forms a double helix chape in its natural condition.  At a certain temperature a DNA doublle helix will unwind or 'melt.'  The temperature required for this depends in large part on the nucleotide pairing within the double helix, with C-G pairings requiring more energy (and therefore a higher tempurature) to 'melt' than A-T pairs.</div><div><button onclick=\"generateTutorial(true, 2)\">Next</button></div></div></p>"
+	  tutorialHTML="<p><div style=\"display:table;\"><div style=\"float:right;\"><img src=\"img/dna_small.png\" height=\"211\" width=\"100\"></img></div><div class=\"tutorial_title\">Minimum and maximum melting temperature</div><div  class=\"tutorial_text\">DNA is a double stranded molecule that forms a double helix chape in its natural condition.  At a certain temperature a DNA doublle helix will unwind or 'melt.'  The temperature required for this depends in large part on the nucleotide pairing within the double helix, with C-G pairings requiring more energy (and therefore a higher tempurature) to 'melt' than A-T pairs.</div><div class=\"next_button\"><br /><button onclick=\"generateTutorial(true, 2)\">Next</button></div></div></p>"
 	  break;
 	case 2:
-	  tutorialHTML="<p><div>Minimum percentage of recoded nucleotides</div><div>This parameter is the minimum change in nucleotids that you are requiring for your watermarks.  The purpose of recoding nuclotides during the watermarking phase is to insert stretches of DNA into the synthetic gene or genome that does not change any function (they code for the same amino acids and therefore the same proteins) but offers a target for you to examine to make sure you are working with your synthetic gene.</div><div class=\"next_button\"><button onclick=\"generateTutorial(true, 3)\">Next</button></div></p>"
+	  tutorialHTML="<p><div style=\"display:table;\"><div style=\"float:right;\"><img src=\"img/Codons_aminoacids_table_small.png\" height=\"211\" width=\"100\"></img></div><div class=\"tutorial_title\">Minimum percentage of recoded nucleotides</div><div class=\"tutorial_text\">This parameter is the minimum change in nucleotids that you are requiring for your watermarks.  The purpose of recoding nuclotides during the watermarking phase is to insert stretches of DNA into the synthetic gene or genome that does not change any function (they code for the same amino acids and therefore the same proteins) but offers a target for you to examine to make sure you are working with your synthetic gene.</div><div class=\"next_button\"><br /><button onclick=\"generateTutorial(true, 3)\">Next</button></div></div></p>"
 	  break;
 	case 3:
-	  tutorialHTML="<p><div>Smallest to largest amplification region allowed</div><div>This parameter sets the range of the size that the amplification region flanked by the watermarks can be.  This includes the watermarks themselves.  Typically this is between 200 and 500 which is a large enough range to amplify successfully in PCR without being too large.  This can vary depending on the size of your gene or genome that you wish to watermark.</div><div class=\"next_button\"><button onclick=\"generateTutorial(true, 4)\">Next</button></div></p>"
+	  tutorialHTML="<p><div class=\"tutorial_title\">Smallest to largest amplification region allowed</div><div class=\"tutorial_text\">This parameter sets the range of the size that the amplification region flanked by the watermarks can be.  This includes the watermarks themselves.  Typically this is between 200 and 500 which is a large enough range to amplify successfully in PCR without being too large.  This can vary depending on the size of your gene or genome that you wish to watermark.</div><div class=\"next_button\"><br /><button onclick=\"generateTutorial(true, 4)\">Next</button></div></p>"
 	  break;
 	default:
 	  // remove DIVs
