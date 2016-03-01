@@ -210,32 +210,44 @@ var CODON_TABLE = {
 		var _score = 0;
 		for (var i = 0; i < kmer_scores.length; i++) {
 			for (var j = i; j < kmer_scores.length; j++) {
-				if ( i == j ) continue;
+				if ( i == j )
+				  continue;
 				var _combined = kmer_scores[i].score + kmer_scores[j].score;
-				var _distance = ( kmer_scores[j].start_codon_position * 3 + KMER_SIZE ) - ( kmer_scores[i].start_codon_position * 3 );
-				if (_distance > maximum_amplification) break;
+				var _distance = 0;
+				var i_left = true;
+				if ( kmer_scores[i].start_codon_position < kmer_scores[j].end_codon_position ) {
+				  _distance = ( kmer_scores[j].end_codon_position ) - ( kmer_scores[i].start_codon_position );
+				} else {
+				  //_distance = ( kmer_scores[i].start_codon_position * 3 + KMER_SIZE ) - ( kmer_scores[j].start_codon_position * 3 );
+				  _distance = ( kmer_scores[i].end_codon_position ) - ( kmer_scores[j].start_codon_position );
+				  i_left = false;
+				}
+				if (_distance > maximum_amplification) 
+				  continue;
 				
-				if (_combined > _score && _distance >= minimum_amplification) {
-					// Higher score found; record match
-					highest_scores.length = 0;
-					var _highest = {
+				if (_combined >= _score && _distance >= minimum_amplification) {
+					if (_combined > _score) {
+						// Higher score found
+						highest_scores.length = 0;
+					}
+					if (i_left) {
+						var _highest = {
 							left:kmer_scores[i],
 							right:kmer_scores[j],
-							distance:_distance,
-							start:kmer_scores[j].start_codon_position
-					};
-					highest_scores.push(_highest);
-				} else if (_combined == _score && _distance >= minimum_amplification) {
-					var _highest = {
-							left:kmer_scores[i],
-							right:kmer_scores[j],
-							distance:_distance,
-							start:kmer_scores[j].start_codon_position
-					};
+							distance:_distance
+						};
+						// start:kmer_scores[j].start_codon_position
+
+					} else {
+						var _highest = {
+							left:kmer_scores[j],
+							right:kmer_scores[i],
+							distance:_distance
+						};
+						// start:kmer_scores[j].start_codon_position
+					}
 					highest_scores.push(_highest);
 				}
-				
-
 			}
 		}
 		
