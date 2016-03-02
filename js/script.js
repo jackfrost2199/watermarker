@@ -18,7 +18,7 @@ var THIRD_NUC_SUB_SCORE = 1; // Score value if there is a substitution possible 
 
 //Default standard amino acid table
 var AA_TABLE = {
-	A:["GCU","GCC","GCA","GCG"],
+	A:["GCT","GCC","GCA","GCG"],
 	R:["AGA","AGG","CGT","CGC","CGA","CGG"],
 	N:["AAT","AAC"],
 	D:["GAT","GAC"],
@@ -546,6 +546,7 @@ function validateAmplificationRegion (submitted, error_id) {
 	setErrors (submitted, error_id);
 	return false;
 }
+
 //
 // Make sure amplification size range is a positive number
 //
@@ -629,7 +630,7 @@ function setCodonTable (organism) {
   if (organism == "mycobacterium") {
 	// Mycobacterium smegmatis str. MC2 155 amino acid table
 	AA_TABLE = {
-		A:["GCU","GCC","GCA","GCG"],
+		A:["GCT","GCC","GCA","GCG"],
 		R:["AGA","AGG","CGT","CGC","CGA","CGG"],
 		N:["AAT","AAC"],
 		D:["GAT","GAC"],
