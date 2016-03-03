@@ -1,5 +1,13 @@
 
+// *********************************************
+//
 // GLOBAL VARIABLES
+// ----------------
+// These variables are setting the defaults for
+// the user defined variables.
+//
+// *********************************************
+/** @global */
 var MIN_TEMP = 0; // Minimum temperature allowed
 var MAX_TEMP = 200;  // Maximum temperature allowed
 var MIN_AMP = 100; // Minimum amplification size allowed
@@ -15,8 +23,13 @@ var FIRST_NUC_SUB_SCORE = 1; // Score value if there is a substitution possible 
 var SECOND_NUC_SUB_SCORE = 1; // Score value if there is a substitution possible on the second nucleotide of the codon
 var THIRD_NUC_SUB_SCORE = 1; // Score value if there is a substitution possible on the third nucleotide of the codon
 
-
-//Default standard amino acid table
+// *********************************************
+//
+// This is the default standard amino acid table
+// set as a global variable
+//
+// *********************************************
+/** @global */
 var AA_TABLE = {
 	A:["GCT","GCC","GCA","GCG"],
 	R:["AGA","AGG","CGT","CGC","CGA","CGG"],
@@ -41,7 +54,12 @@ var AA_TABLE = {
 	STOP:["TAA","TAG","TGA"]
 };
 
-// Default human codon table
+// *********************************************
+//
+// Default codon table (human)
+//
+// *********************************************
+/** @global */
 var CODON_TABLE = {
 	AAA:"K",AAC:"N",AAG:"K",AAT:"N",TTT:"F",TTC:"F",TTA:"L",TTG:"L",CTT:"L",CTC:"L",CTA:"L",CTG:"L",
 	ATT:"I",ATC:"I",ATA:"I",ATG:"M",GTT:"V",GTC:"V",GTA:"V",GTG:"V",TCT:"S",TCC:"S",TCA:"S",TCG:"S",
@@ -51,10 +69,25 @@ var CODON_TABLE = {
 	GGT:"G",GGC:"G",GGA:"G",GGG:"G"
 };
 
-
+// *********************************************
+//
 // GLOBAL FUNCTIONS
+// ----------------
+// These are documented via jsdoc
+//
+// *********************************************
+
+
+/**
+ * Core functionality for generating watermarks
+ * 
+ */
 	function calculateWatermarks () {
 	
+		  //
+		  // Call for the set of validation functions to make sure
+		  // all parameters are acceptable.
+		  //
 		var failed = validateAll ();
 		if (failed) {
 			console.log("DEVELOPER: Failed form validation.");
@@ -63,32 +96,46 @@ var CODON_TABLE = {
 			console.log("DEVELOPER: Passed form validation.");
 		}
 	
-		// Grab the different form entries now that everything is validated
+		  // **************************************************************** 
+		  // Grab the different form entries now that everything is validated
+		  // ****************************************************************
+		
+		  //
+		  // Grab the genomic sequence from the form
+		  //
 		var genomic_sequence = document.getElementById("genomic_sequence").value;
 		genomic_sequence = genomic_sequence.replace(/(" "|\r\n|\n|\r)/gm,"");
-		// Create the parts of the genome that are going to be tested
-		// WARNING - Why create a truncated sequence?  Full sequence should be tested
-		//truncated_genomic_sequence = genomic_sequence.slice(GENE_BEGINING,(GENE_END * -1)).toUpperCase();
+		  // Create the parts of the genome that are going to be tested
+		  // This will change the nucleotide sequence to toUpperCase
+		  // and remove spaces
+		  // #WARNING - should add replacement of U to T here?
 		var truncated_genomic_sequence = genomic_sequence.toUpperCase();
 		truncated_genomic_sequence = truncated_genomic_sequence.replace(/\s+/g, '');
-		//genomic_sequence = truncated_genomic_sequence;
 		
-		
+		  //
+		  // Grab the additional variables from the HTML form.
+		  //
 		var minimum_melting_temp = parseInt(document.getElementById("minimum_melting_temp").value);
 		var maximum_melting_temp = parseInt(document.getElementById("maximum_melting_temp").value);
 		var minimum_amplification = parseInt(document.getElementById("minimum_amplification").value);
 		var maximum_amplification = parseInt(document.getElementById("maximum_amplification").value);
 		var minimum_recoded = parseInt(document.getElementById("minimum_recoded").value);
 
+		  //
+		  // Get organism type
+		  //
 		var organism = document.getElementById("organism").value;
-		// Set organism codon table
+		  // Set the organism codon table
 		setCodonTable(organism);
 		
 		
-		// Convert triplets to amino acids
-		// Need codon table
-		// Start grabbing triplets and deciding the level of change allowed.
+		  // Convert triplets to amino acids
+		  // Need codon table
+		  // Start grabbing triplets and deciding the level of change allowed.
 		var full_map = new Array();
+		
+		  // Loop through the sequences and create the codon table _map
+		  // Can call amino acid via codon or call codons via amino acid
 		for (var i = 0; i < (truncated_genomic_sequence.length / 3); i++) {
 			var _codon = truncated_genomic_sequence.substring((i * 3), ((i + 1) * 3));
 			if (_codon.length < 3) continue;
@@ -101,8 +148,8 @@ var CODON_TABLE = {
 			full_map.push(_map);
 		}
 		
-		// Each kmer should get a score
-		// Generate kmers
+		  // Generate kmers
+		  // Each kmer should get a score
 		
 		var kmer_scores = new Array();
 		var kmer_map = new Array();
@@ -371,6 +418,16 @@ var CODON_TABLE = {
   		return Math.log(val) / Math.LN10;
 	}
 */	
+
+
+	/**
+	 * Determine the meltring temperature for a KMER based on
+	 * the different type of nucleotides and using the equation 
+	 * from www.basic.northwestern.edu/biotools/oligocalc.html
+	 * @author JackFrost2199
+	 * @param {string} kmer_string - The string representing the nucleotide sequence that should be used to generate a melting temperature.
+	 * 
+	 */
 	function determineMeltingTemperature (kmer_string) {
 		var wA = kmer_string.split("A").length - 1;
 		var zC = kmer_string.split("C").length - 1;
@@ -464,9 +521,13 @@ var CODON_TABLE = {
 		return failed;
 	}
 
-//
-// Generically set properties of errors based on the input
-//
+/**
+ * Generically set properties of error messages based on the input
+ * @author JackFrost2199
+ * @param {Bool} submitted - Whether or not the computation has been submittted
+ * @param {String} error_id - The DIV id that the error message should be placed in
+ * 
+ */
 function setErrors (submitted, error_id) {
 	if (submitted) $( "#error_alert" ).css("display", "block");
 	if ($.isArray(error_id)){
@@ -480,9 +541,13 @@ function setErrors (submitted, error_id) {
 	}
 }
 
-//
-// Validate that a temperature is between MIN_TEMP and MAX_TEMP and is a number
-//
+/**
+ * Determine if the temperature predicted is between the MIN_TEMP and the MAX_TEMP and is a number
+ * @author JackFrost2199
+ * @param {Bool} submitted - Whether or not the computation has been submittted
+ * @param {String} error_id - The DIV id that the error message should be placed in
+ * @returns {Bool} True if passes validation, false if it fails
+ */
 function validateMeltingTemperature (submitted, error_id) {
 	//var _minimum_melting_temp = document.getElementById("minimum_melting_temp").value;
 	var _melting_temp = $( error_id ).val();
@@ -497,9 +562,13 @@ function validateMeltingTemperature (submitted, error_id) {
 	return false;
 }
 
-//
-// Validate that the melting temperatures are appropriately spaced (ie. minimum not larer than max)
-//
+/**
+ * Validate that the melting temperatures are appropriately spaced (ie. minimum is not larger than maximum)
+ * @author JackFrost2199
+ * @param {Bool} submitted - Wheter or not the computation has been submitted
+ * @param {String} error_id - The DIV id that the error message should be placed in
+ * @returns {Bool} True if passes validation, false if it fails
+ */
 function validateMeltingTemperatureRanges (submitted, error_id) {
 	var _min_temp = $( error_id[0] ).val();
 	var _max_temp = $( error_id[1] ).val();
@@ -513,9 +582,13 @@ function validateMeltingTemperatureRanges (submitted, error_id) {
 	return false;
 }
 
-//
-// Validate the the minimum percentage of recoded required is between 0 and 100
-//
+/**
+ * Validate the the minimum percentage of recoded required is between 0 and 100
+ * @author JackFrost2199
+ * @param {Bool} submitted - Wheter or not the computation has been submitted
+ * @param {String} error_id - The DIV id that the error message should be placed in
+ * @returns {Bool} True if passes validation, false if it fails
+ */
 function validateMinimumPercentageRecoded (submitted, error_id) {
 	var _minimum_recoded = $(error_id).val();
 	if ( isNaN(_minimum_recoded) ) {
@@ -529,9 +602,14 @@ function validateMinimumPercentageRecoded (submitted, error_id) {
 	return false;
 }
 
-//
-// Make sure amplification values are valid
-//
+/**
+ * Make sure amplification values are valid (is a number and is between the hard Minimum and Maximum
+ * amplification sizes.
+ * @author JackFrost2199
+ * @param {Bool} submitted - Wheter or not the computation has been submitted
+ * @param {String} error_id - The DIV id that the error message should be placed in
+ * @returns {Bool} True if passes validation, false if it fails
+ */
 function validateAmplificationRegion (submitted, error_id) {
 	var _amplification = $( error_id ).val();
 	if ( isNaN(_amplification) ) {
@@ -547,9 +625,13 @@ function validateAmplificationRegion (submitted, error_id) {
 	return false;
 }
 
-//
-// Make sure amplification size range is a positive number
-//
+/**
+ * Make sure amplification size range is a positive number
+ * @author JackFrost2199
+ * @param {Bool} submitted - Wheter or not the computation has been submitted
+ * @param {String} error_id - The DIV id that the error message should be placed in
+ * @returns {Bool} True if passes validation, false if it fails
+ */
 function validateAmplificationRange (submitted, error_id) {
 	var _min_amp = $( error_id[0] ).val();
 	var _max_amp = $( error_id[1] ).val();
@@ -563,16 +645,20 @@ function validateAmplificationRange (submitted, error_id) {
 	return false;
 }
 
-//
-// Validate that the genomic information is valid
-//
+/**
+ * Validate that the genomic information is valid
+ * @author JackFrost2199
+ * @param {Bool} submitted - Wheter or not the computation has been submitted
+ * @param {String} error_id - The DIV id that the error message should be placed in
+ * @returns {Bool} True if passes validation, false if it fails
+ */
 function validateGenomeSequence (submitted, error_id) {
 	var _sequence = $( error_id ).val().toLowerCase();
 	_sequence = _sequence.replace(/(\r\n|\n|\r|\s+)/gm,"");
 
 	//DEBUG
-	var dbg = _sequence.split("\n");
-	console.log("Number of newlines: " + dbg.length);
+	//var dbg = _sequence.split("\n");
+	//console.log("Number of newlines: " + dbg.length);
 		
 	var passed = true;
 	for (var i = 0; i < _sequence.length; i++) {
@@ -604,9 +690,14 @@ function validateGenomeSequence (submitted, error_id) {
 	return false;
 }
 
-//
-// Validate that sequence is long enough
-//
+/**
+ * Validate Genome Length.  Determine if sequence length is too small for the minimum amplification
+ * @author JackFrost2199
+ * @param {Bool} submitted - Wheter or not the computation has been submitted
+ * @param {String} error_id - The DIV id that the error message should be placed in
+ * @returns {Bool} True if passes validation, false if it fails
+ * 
+ */
 function validateGenomeLength (submitted, error_id) {
 	var _sequence = $( error_id[0] ).val().toLowerCase();
 	var _min_amp = $( error_id[1] ).val();
@@ -618,14 +709,14 @@ function validateGenomeLength (submitted, error_id) {
 		setErrors(submitted, error_id[0]);
 		return false;
 	}
-	
 	return true;
 }
 
-//
-// Set codon table
-//
-
+/**
+ * Set the codon table based on the organism.
+ *@param {string} organism - This is the organims that the codon table should be generated based off of
+ * 
+ */
 function setCodonTable (organism) {
   if (organism == "mycobacterium") {
 	// Mycobacterium smegmatis str. MC2 155 amino acid table
@@ -668,10 +759,14 @@ function setCodonTable (organism) {
   }
 }
 
-//
-// Generate the tutorial hovers
-//
-
+/**
+ * Generate the tutorial for use in Watermarker.
+ * This gives three walk through steps of the process
+ * so users can learn.  Recursive function that generates the tutorial hovers.
+ * @param {bool} tutorial_needed - Toggle whether or not the tutorial should be shown
+ * @param {int} tutorial_index - The index for whichever tutorial needs to be pushed out.
+ * 
+ */
 function generateTutorial (tutorial_needed, tutorial_index) {
   if(!tutorial_needed) 
 	return;
@@ -695,7 +790,6 @@ function generateTutorial (tutorial_needed, tutorial_index) {
 	  return;
   }
   
-  
   // Change the lightbox HTML
   document.getElementById('light').innerHTML=tutorialHTML;
   
@@ -704,7 +798,6 @@ function generateTutorial (tutorial_needed, tutorial_index) {
   document.getElementById('fade').style.display='block';
   document.getElementById('light').style.visibility='visible';
   document.getElementById('fade').style.visibility='visible';
-  
 }
 
 //
